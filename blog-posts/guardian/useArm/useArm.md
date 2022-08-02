@@ -39,7 +39,7 @@ The AWS Lambda service offers the possibility to use the AWS Graviton2 processor
 To switch all functions to AWS Graviton2 processor, configure architecture at the provider level as follows:
 
 ```ts
-// serverless.ts
+// serverless.yml
 
 provider:
   ...
