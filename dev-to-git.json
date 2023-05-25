@@ -2,5 +2,9 @@
   {
     "id": 1133221,
     "relativePathToArticle": "./blog-posts/guardian/useArm/useArm.md"
+  },
+  {
+    "id": 1480796,
+    "relativePathToArticle": "./blog-posts/integ-test/introArticle/integTest.md"
   }
 ]
