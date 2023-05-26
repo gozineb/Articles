@@ -3,7 +3,7 @@ published: false
 title: 'Get empowered with AWS CDK Integ Test'
 cover_image:
 description: ''
-tags: serverless, cdk, integ-test, integ-runner, aws
+tags: serverless, cdk, integ-runner, aws
 series: 'Integ tests'
 canonical_url:
 ---
