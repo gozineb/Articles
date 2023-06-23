@@ -8,40 +8,64 @@ series: 'Integ tests'
 canonical_url:
 ---
 
-Do you ever get frustrated testing your infrastructure and resources behavior only to discover errors after deployment? As a developer, I feel your pain. More so when knowing how an essential aspect of software development testing is and how a complex and time-consuming task it can be ! Enter integ-runner and aws-cdk integ-test library – two powerful testing tools developed by AWS CDK that streamline the testing process.
+Do you ever get frustrated testing your infrastructure and resources behavior only to discover errors after deployment? As a developer, I feel your pain.Testing is an essential aspect of software development, and it can be a complex and time-consuming task! Luckily, AWS CDK has developed two powerful testing tools - integ-runner and aws-cdk integ-test library - that streamline the testing process.
 
 In this article, I'll walk you through a CDK App example repository that illustrates how to implement and use these tools. By the end, you'll have a clear understanding of how AWS CDK integration tests can help you build better infrastructure with less stress!
 
 ![Meme: Don't be confused while working with AWS CDK - use integ test](./assets/dev-working-with-aws-cdk.jpg)
 
-## Do I still need to convince you of the overall value of integration tests ?
+# Github Repo:
 
-You can use unit tests to check that your dynamoDb Table or Lambda Function is correctly set, but you can't use unit tests to check that your dynamoDb Table and your lambda interact correctly with each other. That's what integration tests are for. And as nothing is more self-explainatory than a meme:
+Link to the github repo: https://github.com/gozineb/aws-cdk-app-integration-tests
 
-![Please, don't forget integration tests.](./assets/yHGn1.gif)
+# Let's lay some theory around tests
+
+In this section, I'll be guiding you through the creation of your CDK app, and setting it up with integ-test. To illustrate the process, let's consider two stacks: a simple Lambda setup and an S3 bucket designed to fail the tests.
+
+## Understanding the Value of Integration Tests
+
+You can use unit tests to check that your DynamoDb Table or Lambda Function is correctly set, but you can't use unit tests to check that your dynamoDb Table and your lambda interact correctly with each other. That's what integration tests are for. And as nothing is more self-explainatory than a meme:
+
+![Please, don't forget integration tests.](./assets/2-unit-tests-0-integration-test.gif)
 
 ## Use the latest tools to test your AWS CDK constructs
 
-Let's say your developing a CDK app or library. As your are working on building your constructs, at each development step, two questions are raised :
+Let's say you are developing a CDK app or library. As you are working on building your constructs, at each development step, two questions are raised:
 
-- Did I mess up my infrastructure without realizing?
-- My infrastructure is fine but does everything that worked still work as expected?
+- Did I mess up my infrastructure without realizing it?
+- My infrastructure is fine but does everything that worked before still work as expected?
 
 In the context of AWS CDK integration tests, there are two types of tests that you might encounter and that will bring you answer: snapshot tests and assertion tests.
 
-Snapshot tests are useful to check your cloufromation templates whereas assertion tests are useful for testing the behavior of the deployed resources.
+Snapshot tests are useful to check your CloudFormation templates. Assertion tests are useful for testing the behavior of the deployed resources.
 
-![Schema: snapshot and assertion testing tools](./assets/integ_runner.png)
+Combined, here is a quick overview of how it works:
+
+![Schema: snapshot and assertion testing tools](./assets/integrations-tests-overview.png)
 
 We will be using IntegTest library to define our integration tests. Then we will be using integ-runner in order to run and manage these tests.
 
 ## Let's dive into our testing tools
 
-Once our test file is declared with Integ Test, Integ runner works in two parts. The first part concerns the snapshots while the second one concerns the assertions if there are any.
+Once our test file is declared with integ-tests, we use aws-cdk-lib/assertions to add assertions to our tests and we run it with integ-runner !
+
+### Assertion testing
+
+<!-- Integ tests to define the tests in schema  -->
+
+Assertion testing in the context of AWS CDK is used to test the behavior of deployed resources. Developers define an integration test using the `IntegTest` construct. Then, using the different integ-tests tools, API calls are made and once the request has timed out, we can check that the actions resulted in the expected events.
+
+Then, using the aws-cdk-lib/assertions, we can add fine-grained assertions can test specific aspects of the generated CloudFormation template, such as "this resource has this property with this value." Those are unit tests on the cloudformation template.
+
+Assertions are made on the infrastructure before the deployment is considered successful.
+
+Here is the general overview covering integ-test and its assertion tools:
+
+![Schema: Assertion testing tools](./assets/assertion_tools.png)
 
 ### Snapshot testing
 
-Here is the snapshots decision tree:
+Snapshots allow you to not have to re-run all of your tests everytime. Here is the snapshots decision tree:
 
 ![Schema: snapshot and assertion testing tools](./assets/snapshot_testing.png)
 
@@ -51,60 +75,42 @@ To re-run the integration test for the failed tests you would then run:
 
 This will run the snapshot tests and collect all the failed tests. It will then re-execute the integration test for the failed tests and if successful, save the new snapshot.
 
-Snapshots testing are quite common (e.g with react components) and are often overlooked by developpers when automatically using the --update-on-failed option. While developping with CDK, the importance given to snapshots are on another dimension as we will see later on.
+Snapshot testing are quite common (e.g with [react components using jest](https://jestjs.io/docs/snapshot-testing)) and are often overlooked by developers when automatically using the `--update-on-failed` option. While developing with CDK, snapshots are as important as IaC is to CDK.
 
-### Assertion testing
+# Let’s set up our CDK app and test it with integ-tests in typescript !
 
-<!-- Integ tests to define the tests in schema  -->
+In this section, I'll be guiding you through the creation of your CDK app, and setting it up with integ-test. To illustrate the process, let's consider two stacks: a simple Lambda setup and an S3 bucket designed to fail the tests.
 
-Assertion testing in the context of AWS CDK is used to test the behavior of deployed resources. Developers define an integration test using the IntegTest construct. Then using the different IntegTest tools, API calls are made and once the polling has timed out, we can check that the actions resulted in the expected events.
+## Kick-off your project
 
-Fine-grained assertions can test specific aspects of the generated CloudFormation template, such as "this resource has this property with this value." The assertion constructs are used to make assertions on the infrastructure before the deployment is considered successful.
+Start by creating your empty folder directory:
 
-Assertion testing is important as it allows developers to ensure that the deployed resources behave as expected and can detect regressions.
+`mkdir myDirectory && cd myDirectory`
 
-Here is the general overview covering integ test and its assertion tools:
-
-![Schema: Assertion testing tools](./assets/assertion_tools.png)
-
-# Let’s set up our CDK app and its testing with IntegTest and integ-runner in typescript !
-
-In this section, i'll be guiding you through the creation of your CDK app, setting it up with integ test & through multiple examples to illustrate the whole bunch of theory that was spit in the previous sections !
-
-### Create your project
-
-Let’s start from scratch by creating our CDK app project with the following command:
+Next, initialize your CDK app project with the command:
 
 `npx aws-cdk init app --language typescript`
 
-### Setting up integ test
+## Setting up integ test
 
 Next, we are going to need to install Integ Test in our project:
 
 `npm install @aws-cdk/integ-tests-alpha --save-dev`
 
-You must have noticed the 'alpha' in the package name. IntegTest is still under development and breaking changes might occur in the incoming months so keep an eye open on the next AWS realeases.
+_You must have noticed the 'alpha' in the package name. integ-tests is still under development and breaking changes might occur in the incoming months so keep an eye open on the next AWS releases !_
 
-Now we will create the test file in our test folder. Integ-runner looks for all files matching the naming convention of /integ.\*.js$/ in the test folder in the root (you can specify your own directory). Each test file is a self contained CDK app.
+## Writing your test with integ-tests
 
-Now that we have all the theory that we need, let’s set up our first integration test with integ test !
-
-## Writing your test with Integ Test
-
-We need something to test, so in order to illustrate what was said before, we will set up 2 different stacks to test:
-
-- A first one with a very simple lambda to set up a first test and to be reused later on for assertions
-- A second one that is bound to fail tests with an s3 bucket
+To illustrate the process, let's consider two stacks: a simple Lambda setup and an S3 bucket designed to fail the tests.
 
 ### Let's start simple
 
 #### Setting up the stack
 
-I have set up a very simple stack with a simple lambda:
+In the `lib` directory, I have set up a very simple stack with a simple lambda:
 
 ```typescript
 import * as cdk from 'aws-cdk-lib';
-import path from 'path';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 
@@ -125,11 +131,9 @@ My stack only contains one resource which is a lambda that console logs "Hello, 
 
 #### Testing that stack
 
-We start by creating a new file named `integ.simple-lambda.ts` - which will be transpiled to `integ.simple-lambda.js` by the compiler - in your `test/` directory. This file will contain the CDK app for the integration test.
+Once your stack is ready, create an integration test. Simply draft a new **`integ.simple-lambda.ts`** file in your **`test/`** directory.
 
-We import the required modules, create a new CDK app, and instantiate the `SimpleLambdaStack`as part of the app.
-
-We then create an `IntegTest` instance, passing the instantiated stack as the single test case for this example:
+Start by importing necessary modules and making a fresh CDK app. This app will contain an instance of our **`SimpleLambdaStack`**. Following this, generate an **`IntegTest`** instance, passing the stack as the only test case.
 
 ```typescript
 import { App } from 'aws-cdk-lib';
@@ -148,43 +152,56 @@ app.synth();
 
 This testing file basically defines and sets up a stack ready for deployment. You could definitely use a simple `cdk deploy` for that but it doesn't provide built-in support for running multiple integration tests or handling snapshot updates. But no worries, let's use integ-runner !
 
-As explained earlier in this article, `integ-runner` will deploy our test stack and will take care of handling snapshots and running integration tests for us. In order to do so, just run the following command: `npx integ-runner`
+As explained earlier in this article, `integ-runner` will deploy our test stack and will take care of handling snapshots and running integration tests for us. In order to do so, just run the following command: `npx @aws-cdk/integ-runner`
 
 ![launch `npx integ-runner` in terminal](./assets/first-integ.png)
 
-As you can see, our test has failed. More precisely, the snapshot testing has failed. That is no big news as we are making deliberate changes to our construct. We can therefore use the `--update-on-failed` option when launching integ-runner.
+You'll notice our test fails, specifically during snapshot testing, an expected result due to our deliberate construct alterations. The **`--update-on-failed`** option can address this when initiating integ-runner.
 
-But wait, what am I testing here ? Where are the assertions that one expects in any type of test ?
+---
 
-Well, our test does not contain any assertion. As it is, it "only" tests the infrastructure.
+#### Take a look at your cloudformation 👀
 
-Using integration tests without assertions can still serve valuable purposes, such as acting as a regression detector as you can detect any unintended changes in the infrastructure code. Additionally, integration tests can help ensure that the CDK application is deployable and that the eventual dependencies between the different infrastructure components are respected.
+If you take a look at your cloudformation, 2 stacks must have been created in the following order:
 
-The next example is here just to illustrate these use cases !
+- **SimpleStackIntegTest**: This stack represents your actual stack that you want to test. It contains the resources and configurations defined in your integ-test file.
+- **IntegTestDefaultTestDeployAssert...**: This stack is a temporary stack automatically created by integ-runner for the purpose of executing integration test using a custom resources. The custom resource allows you to validate the behavior of the deployed resources, and if the tests fail, CloudFormation triggers an automatic rollback of the stack.
+
+![launch `npx integ-runner` in terminal](./assets/simple-stack-integtest-default-2.png)
+
+---
+
+At this juncture, you might question the absence of assertions, a usual test feature. This test is assertion-free, focusing on infrastructure testing.
+
+Unorthodox as it may seem, assertion-less integration tests offer value. They act as regression guards, spotting unexpected code changes, and assure the CDK application's deployability and component coherence. With this, refactor fearlessly, knowing you're protected against surprises.
+
+The following example demonstrates these points.
 
 ### Let's make a (deliberate ?) breaking change !
 
-I will now set up a stack with a single resource: some S3 bucket. At first my bucket name is `bucket-original-name` but let's say a developer decided to change the bucket name or just mistakenly did so.
+Let's consider a stack with a single resource, an S3 bucket named **`bucket-original-name`**. Now, suppose the bucket name is changed, either intentionally or by mistake.
 
-As you might know, it is not possible to change the name of a bucket name in S3. For that you would need to actually create a new bucket and copy every file from that old bucket to your new bucket.
+Remember, direct bucket name changes in S3 aren't possible; you'd need to create a new bucket and manually move all files across.
 
-You can definitely run `aws-cdk deploy` without any issue and without any warning. You'll just end up with two buckets but the one you're pointing at now is empty and all the files are still stuck in the old one:
+Here's the catch. Running **`aws-cdk deploy`** now would proceed smoothly, giving no warnings, but it would create two buckets. The new one would be empty, while all files would still be in the original bucket.
 
 ![Terminal: bucket name change detected when running integ-runner](./assets/bucketname-change-deploy.png)
 
-Whereas a simple integration test with Integ Test and with integ-runner will SCREAM and WARN you that this is actually a destructive change thanks to the snapshots. Of course, one can be pushed to make destructive changes throughout the development process but these changes often require some other actions to take place smoothly (if not at least warning your co-developers about this).
+Enter Integ Test. This handy tool would alert you to the destructive change through snapshot comparison. Such changes might be necessary but should be managed carefully to avoid unforeseen consequences.
 
-While aws-cdk deploy completely overlooks the problem, integ-runner really urges you to take some action and not let these changes under the hood.
+While **`aws-cdk deploy`** misses the issue, **`integ-runner`** urges you to act, helping avoid hidden surprises.
 
-Here is how integ-runner calls out such a change: ![Terminal: bucket name change detected when running integ-runner](./assets/bucketname-change-detected.png)
+Take a look at how **`integ-runner`** flags this change:
 
-And how it warns you of that: ![Terminal: bucket name change detected when running integ-runner](./assets/bucketname-change-warning.png)
+![Terminal: bucket name change detected when running integ-runner](./assets/bucketname-change-detected.png)
 
-Pretty neat, heh ! But keep in mind that this is just a simple example, and there is a tremendous amount of issues that the integ-test could catch.
+And how it signals a warning: ![Terminal: bucket name change detected when running integ-runner](./assets/bucketname-change-warning.png)
+
+Impressive, isn't it? Remember, this is just a basic example; countless other potential issues can be detected and mitigated using this approach.
 
 #### A quick word about test cases Integ Tests testCases
 
-Imagine now you have a stack with a simple lambda but as props you accept different architectures: x86 or arm64.
+Let's explore testing a stack with a simple lambda that accepts two different architectures as props: x86 or arm64.
 
 ```typescript
 import * as cdk from 'aws-cdk-lib';
@@ -210,11 +227,7 @@ export class FlexibleArchitectureStack extends cdk.Stack {
 }
 ```
 
-How can you make sure that your stack is resilient to both these infrastructures?
-
-That's exactly what Integ Tests testCases attribute allows you to do. It can take as many constructs to test as you'll be able to provide.
-
-Here we have two test cases with these two stacks each instantiated with a different architecture:
+How do you ensure this stack works well with both architectures? Integ Tests' testCases attribute is your ally here. It allows testing multiple constructs, as in our case, where we test the stack with two different architectures:
 
 ```typescript
 const armStack = new FlexibleArchitectureStack(app, 'ArmStackIntegTest', {
@@ -230,21 +243,23 @@ new IntegTest(app, 'IntegTest', {
 });
 ```
 
-Of course, you would be a fool to still run your lambdas on x86 unless constrained, but if you ever need a reminder on why not to do that, this [article](https://dev.to/kumo/that-one-aws-lambda-hidden-configuration-that-will-make-you-a-hero-guardian-is-watching-over-you-5gi7) will do you good.
+Running lambdas on x86 architectures might not be optimal, especially given the advantages arm64 architectures offer, such as cost-efficiency and improved performance. You can learn more about these benefits **[here](https://dev.to/kumo/that-one-aws-lambda-hidden-configuration-that-will-make-you-a-hero-guardian-is-watching-over-you-5gi7)**.
 
-If you need to test the same construct instantiated with different props (i.e different infrastructural choices/requirements), then `testCases` is there for you !
+The **`testCases`** attribute is valuable when testing the same construct with different props. It simplifies testing different infrastructural choices, ensuring your constructs are thoroughly tested.
 
 ### Let's explore IntegTest with assertions
 
-Getting back to our very first example of a stack with a simple lambda returning "Hello, CDK !". How can we make assertions on the resources that form our construct ?
+Let's return to our simple stack example with a lambda returning "Hello, CDK!". How can we assert the resources in our construct?
 
-Easy ! We have previously declared a new instance of the aws cdk class IntegTest. It offers an interface that allows for registering a list of assertions that should be performed on the construct.
-
-On each resource of our construct, we can make API calls and once the polling has timed out, we can make expectations on the invocation result.
+Easily, with aws cdk's IntegTest instance. It offers an interface to register assertions for our construct. We can make API calls for each resource, wait for the request time to elapse, and then assert expectations on the invocation result.
 
 #### With Lambda
 
-For lambdas, we can use the invokeFunction of IntegTest.assertions. The invocation response is then expected to match a certain object. In our case, we need the payload which is what is returned by the lambda to be "Hello, CDK!". The call has to be successful, hence the 200 status code.
+_Parler de la customResource deployee dans la stack d’utilitaire de integ-tests qui peut etre utilisee pour appeler la lambda dans la stack à tester._
+
+For lambdas, we can use the invokeFunction of IntegTest.assertions.
+
+We expect the invocation response to match a specific object - in our case, a 200 status code and the payload "Hello, CDK!".
 
 ```typescript
 export const testSimpleStack = ({ integ }: AssertionTestInput) => {
@@ -264,17 +279,15 @@ export const testSimpleStack = ({ integ }: AssertionTestInput) => {
 };
 ```
 
-Here is what you might see on your terminal when your assertions are successful:
+On successful assertions, your terminal might display:
 
 ![Terminal: bucket name change detected when running integ-runner](./assets/test-with-assertion.png)
 
 #### With other AWS services
 
-Lambda is that one privileged service here that has a specific method within the Integ Test realm to be invoked: the IntegTest.assertion.invokeFunction. For the other services, we will have to call the service directly with `awsApiCall` and give it the adequate attributes.
+We can use IntegTest's **`awsApiCall`** method to interact directly with other AWS services. Though it requires delving into the AWS documentation for correct input and understanding the response structure, which varies upon the called service.
 
-This is the tricky part here is as you need to dig deep in the documentation (lien) to be sure of the input you give awsApiCall but also the response you'll get from it as it strongly depends on the service.
-
-Here is a simple example with an SQS Queue that we could have added to our simple stack:
+Consider an example with an SQS Queue:
 
 ```typescript
 const message = integ.assertions.awsApiCall('SQS', 'receiveMessage', {
@@ -287,14 +300,19 @@ message.expect(
 );
 ```
 
+Though invokeFunction is tailored for Lambda, it's more robust than awsApiCall as it allows more complex interactions with a dedicated testing lambda function. However, our previous lambda invocation could also be performed with awsApiCall('lambda', 'invoke', …).
+
 ## Conclusion
 
-My overall take is that these two tools are really covering a lot of blind spots that can potentially really ruin at least your developer experience and at worse your whole app.
+In my opinion, both of these tools provide significant coverage for various blind spots that can potentially disrupt your developer experience or even impact your entire application.
 
-However, there is a number of pretty big pain points that weren't addressed in this article. To cite a few:
+However, it's important to acknowledge that there are a few significant pain points that haven't been addressed in this article. Some of these pain points include:
 
-- it's still in alpha version so you would need to be actively following the news around these tools;
-- The awsApiCall's input and its response are quite cryptic for a lot of Services (trust me, I broke my teeth on this playing with StepFunctions) and you won't find a lot of examples sitting around;
-- You'll have to be patient as you are actually deploying real stacks on AWS and that requires at least a few dozens of seconds. Repetitively waiting can bum you out at some point ~
+- The tools are still in the alpha version, so it's crucial to actively stay updated on the latest news and developments surrounding them.
+- Understanding the input and response structure of **`awsApiCall`** can be challenging, especially for certain services. Examples and comprehensive documentation for these scenarios may be scarce.
+- Deploying real stacks on AWS takes time, typically several dozen seconds. This repetitive waiting process can become frustrating over time.
+  - _Pro tip: use `--no-clean` when you’re developping your test in order to win some time not redeploying everything_
 
-As with any new technology, the amount of community support and documentation available for the **`aws-cdk integ-test-alpha`** package can impact its usefulness. If there is a lack of support, it may be more difficult to troubleshoot issues or to find helpful resources when working with the package. So how about all contributing to developing these awesome tools ?
+As with any new technology, the level of community support and available documentation for the **`aws-cdk integ-test-alpha`** package can greatly impact its usefulness.
+
+How about contributing to the development of these fantastic tools ? By actively participating and sharing knowledge, we can collectively improve and enhance the functionality and usability of these tools.
