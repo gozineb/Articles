@@ -3,7 +3,7 @@ published: false
 title: 'Harnessing the Power of AWS CDK Testing Tools: A Simplified Guide with integ-tests'
 cover_image:
 description: ''
-tags: serverless, cdk, integ-runner, aws
+tags: serverless, cdk, aws, javascript
 series:
 canonical_url:
 ---
