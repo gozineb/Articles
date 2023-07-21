@@ -1,5 +1,5 @@
 ---
-published: false
+published: true
 title: 'Level Up Your AWS CDK Development: Demystifying integ-runner and integ-test'
 cover_image:
 description: ''
