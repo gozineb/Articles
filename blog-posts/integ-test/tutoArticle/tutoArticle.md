@@ -4,11 +4,11 @@ title: 'Harnessing the Power of AWS CDK Testing Tools: A Simplified Guide with i
 cover_image:
 description: ''
 tags: serverless, cdk, aws, javascript
-series:
+series: 'integTests'
 canonical_url:
 ---
 
-Do you ever get frustrated testing your infrastructure and resources behavior only to discover errors after deployment? As a developer, I feel your pain.Testing is an essential aspect of software development, and it can be a complex and time-consuming task! Luckily, AWS CDK has developed two powerful testing tools - integ-runner and aws-cdk integ-test library - that streamline the testing process.
+--- This is the 2nd article of the series. You can look at the first article here (url_of_the_article) to remember the theory behind what we are going to do next.
 
 In this article, I'll walk you through a CDK App example repository that illustrates how to implement and use these tools. By the end, you'll have a clear understanding of how AWS CDK integration tests can help you build better infrastructure with less stress!
 
@@ -17,65 +17,6 @@ In this article, I'll walk you through a CDK App example repository that illustr
 # Github Repo:
 
 Link to the github repo: https://github.com/gozineb/aws-cdk-app-integration-tests
-
-# Let's lay some theory around tests
-
-In this section, I'll be guiding you through the creation of your CDK app, and setting it up with integ-test. To illustrate the process, let's consider two stacks: a simple Lambda setup and an S3 bucket designed to fail the tests.
-
-## Understanding the Value of Integration Tests
-
-You can use unit tests to check that your DynamoDb Table or Lambda Function is correctly set, but you can't use unit tests to check that your dynamoDb Table and your lambda interact correctly with each other. That's what integration tests are for. And as nothing is more self-explainatory than a meme:
-
-![Please, don't forget integration tests.](./assets/2-unit-tests-0-integration-test.gif)
-
-## Use the latest tools to test your AWS CDK constructs
-
-Let's say you are developing a CDK app or library. As you are working on building your constructs, at each development step, two questions are raised:
-
-- Did I mess up my infrastructure without realizing it?
-- My infrastructure is fine but does everything that worked before still work as expected?
-
-In the context of AWS CDK integration tests, there are two types of tests that you might encounter and that will bring you answer: snapshot tests and assertion tests.
-
-Snapshot tests are useful to check your CloudFormation templates. Assertion tests are useful for testing the behavior of the deployed resources.
-
-Combined, here is a quick overview of how it works:
-
-![Schema: snapshot and assertion testing tools](./assets/integrations-tests-overview.png)
-
-We will be using IntegTest library to define our integration tests. Then we will be using integ-runner in order to run and manage these tests.
-
-## Let's dive into our testing tools
-
-Once our test file is declared with integ-tests, we use aws-cdk-lib/assertions to add assertions to our tests and we run it with integ-runner !
-
-### Assertion testing
-
-<!-- Integ tests to define the tests in schema  -->
-
-Assertion testing in the context of AWS CDK is used to test the behavior of deployed resources. Developers define an integration test using the `IntegTest` construct. Then, using the different integ-tests tools, API calls are made and once the request has timed out, we can check that the actions resulted in the expected events.
-
-Then, using the aws-cdk-lib/assertions, we can add fine-grained assertions can test specific aspects of the generated CloudFormation template, such as "this resource has this property with this value." Those are unit tests on the cloudformation template.
-
-Assertions are made on the infrastructure before the deployment is considered successful.
-
-Here is the general overview covering integ-test and its assertion tools:
-
-![Schema: Assertion testing tools](./assets/assertion_tools.png)
-
-### Snapshot testing
-
-Snapshots allow you to not have to re-run all of your tests everytime. Here is the snapshots decision tree:
-
-![Schema: snapshot and assertion testing tools](./assets/snapshot_testing.png)
-
-To re-run the integration test for the failed tests you would then run:
-
-`integ-runner --update-on-failed`
-
-This will run the snapshot tests and collect all the failed tests. It will then re-execute the integration test for the failed tests and if successful, save the new snapshot.
-
-Snapshot testing are quite common (e.g with [react components using jest](https://jestjs.io/docs/snapshot-testing)) and are often overlooked by developers when automatically using the `--update-on-failed` option. While developing with CDK, snapshots are as important as IaC is to CDK.
 
 # Let’s set up our CDK app and test it with integ-tests in typescript !
 
@@ -101,13 +42,15 @@ _You must have noticed the 'alpha' in the package name. integ-tests is still und
 
 ## Writing your test with integ-tests
 
+**Comment**: To illustrate the process, let's consider two stacks: a simple Lambda setup and an S3 bucket designed to fail the tests.: ça sert a rien de dire ça dans l'intro, on n'entend plus parler de la lambda et du bucket avant "Let’s set up our CDK app and test it with integ-tests in typescript !"
+
 To illustrate the process, let's consider two stacks: a simple Lambda setup and an S3 bucket designed to fail the tests.
 
 ### Let's start simple
 
 #### Setting up the stack
 
-In the `lib` directory, I have set up a very simple stack with a simple lambda:
+In the `lib` directory, I have set up a stack containing only one lambda which console log "hello worlds".
 
 ```typescript
 import * as cdk from 'aws-cdk-lib';

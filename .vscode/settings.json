@@ -15,5 +15,8 @@
   "[html][javascript][json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["embedme", "kumo"]
+  "cSpell.words": ["embedme", "kumo"],
+  "github.copilot.inlineSuggest.enable": true,
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.advanced": {}
 }
