@@ -14,7 +14,7 @@ Do you ever get frustrated testing your infrastructure and resources' behavior, 
 
 _This article kicks off a series dedicated to integ-test. Here, we'll unravel the underlying principles of integ-test and delve into the theory surrounding tests. In the next article, I'll walk you through a CDK App example repository that illustrates how to implement and use these tools. By the conclusion of this series, you'll have a clear understanding of how AWS CDK integration tests can help you build better infrastructure with less stress! 🎉_
 
-Access the Github repository used in this series: [github.com/gozineb/aws-cdk-app-integration-tests](https://github.com/gozineb/aws-cdk-app-integration-tests)
+_Access the [Github repository](https://github.com/gozineb/aws-cdk-app-integration-tests) used in this series._
 
 ## Understanding the Value of Integration Tests
 
@@ -45,9 +45,7 @@ Let's go on a Github repository adventure! Take a look at this [repo](https://gi
 
 ![Structure of the Github repository](./assets/github_repo_files.png)
 
-An example of a typical test file includes the declaration of a new App and multiple assertion tests:
-
-![Example of a test file](./assets/example_test_file.png)
+This is an example of a typical test file, it includes the declaration of a new App, a new stack to feed to integ-test and as many assertion tests as required.
 
 Once we declare our test file with integ-tests, we use `aws-cdk-lib/assertions` to add assertions, and then we run it with integ-runner! 🏃‍♀️🏃‍♂️
 
@@ -63,7 +61,7 @@ To re-run integration tests for failed tests, run:
 
 This will run the snapshot tests and collect all the failed tests. It will then re-execute the integration test for the failed tests. If successful, the new snapshot will be saved.
 
-Snapshot testing is quite common (e.g., [with react components using jest](https://jestjs.io/docs/snapshot-testing)). It is often overlooked by developers when they automatically use the `--update-on-failed` option. Remember, while developing with CDK, snapshots are as important as IaC is to CDK. 💡📸
+_Snapshot testing is quite common (e.g., [with react components using jest](https://jestjs.io/docs/snapshot-testing)). It is often overlooked by developers when they automatically use the `--update-on-failed` option._
 
 ### Assertion Testing
 
@@ -75,6 +73,8 @@ Here's an overview of integ-test and its assertion tools:
 
 ![Schema: Assertion testing tools](./assets/assertion_tools.png)
 
+### Conclusion
+
 Congratulations! 🎉 You now have a good understanding of the importance of integration testing in AWS CDK development and the available tools to harness the power of testing.
 
-Stay tuned for the upcoming article, where you'll be guided through the process of becoming a proficient integration tester in the world of AWS CDK! Let's continue this exciting journey together! 🚀🧪✨"
+Stay tuned for the upcoming article, where you'll be guided through the process of becoming a proficient integration tester in the world of AWS CDK! ✨
